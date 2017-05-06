@@ -1,0 +1,35 @@
+
+**************
+Compilation
+*************
+make
+
+********************
+Running the Program
+********************
+./a.out Assets/assets.txt 
+
+*This is only for my file. I don't know how to run your text files.
+
+******************
+Known Limitations
+******************
+IMPORTANT ONES TO MAKE GAME PLAYABLE:
+-Font has to be size 10 or smaller, y dimension should be above 46 lines to see the status bar.
+-you have to press any button a couple of times after the first room gets drawn because if I were to draw it all at once, the monsters would all be the same.
+ I base the random monsters on time, so the longer the wait between pushing a button, the more likely it will be random.
+-Closing the program: If you quit game by dying or stairs, you have to hit q a couple of times to exit the program.
+
+THE REST:
+-Status bar and the top of the hallways appear normally after user moves once.
+-The notifications bar sometimes has "." characters in it. No idea why or how to fix it.
+-When the user walks into the "A" in the status bar, it gets treated as a monster, so please don't walk into it.
+-Along the left vertical hallway, if the user walks to the left once more into the border,
+ the hero moves to the right of the hallway and produces a walkable "." character.
+
+-The troll cannot be attacked coming in from the left, it will just get overwritten. Not sure about other monsters.
+-The bats randomly dissappear at a random turn count and at random locations.
+-If the monsters are driven towards the walls, they have a chance of dissappearing.
+-Monsters will always be the same in each room because the randomizer is based
+ on time and the monsters in the room get generated at the exact same time. 
+ 

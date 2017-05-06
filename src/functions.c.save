@@ -1,0 +1,633 @@
+/*#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <ncurses.h>
+
+#define player "@"
+
+//structs to be included in .h file
+typedef struct room_
+{
+    int y;
+    int x;
+    int* realX;
+    int* realY;
+    //declaring door ints for parsing
+    int doorY[10];
+    int doorX[10];
+   // int elements[10];
+}room;
+//////////////////////////////////////
+*/
+#include "functions.h"
+
+void getSpec(char* file)
+{
+    //most of these are because I don't know how to pass a(n) struct / array of structs
+    char* str;
+    char string[256] = "";
+    char newString[256] = "";
+    char* y;
+    char* x;
+    int roomNum = 0;
+    int yVal[6];
+    int xVal[6];
+    //array of structs for the rooms
+    room * theRooms;
+    theRooms = malloc(sizeof(room)*6);
+
+    FILE* specFile;
+    specFile = fopen(file,"r");
+
+    while(fgets(string,256,specFile)!=NULL)
+    {
+        //variables
+        int doorNum = 0;
+        char* door;
+        char newDoor[2] = "";
+        char* hero;
+        char heroY[2] = "";
+        char heroX[2] = "";
+        char* stairDown;
+        char stairDX[2] = "";
+        char stairDY[2] = "";
+        int stairdNum = 0;
+        char* stairUp;
+        char stairUX[2] = "";
+        char stairUY[2] = "";
+        int stairuNum = 0;
+        char* sGold;
+        char sGoldy[2] = "";
+        char sGoldx[2] = "";
+        int sGoldnum = 0;
+        char* bGold;
+        char bGoldy[2] = "";
+        char bGoldx[2] = "";
+        char* cWep;
+        char cWepx[2] = "";
+        char cWepy[2] = "";
+        int cWepn = 0;
+        char* rWep;
+        char rWepy[2] = "";
+        char rWepx[2] = "";
+        char* wMon;
+        char wMony[2] = "";
+        char wMonx[2] = "";
+        int wMonn = 0;
+        char* equip;
+        char equipY[2] = "";
+        char equipX[2] = "";
+        int eqN = 0;
+        char* sMon;
+        char sMony[2] = "";
+        char sMonx[2] = "";
+        int sMonn = 0;
+        char* pot;
+        char poty[2] = "";
+        char potx[2] = "";
+        int potN = 0;
+        //ydimension
+        y = strtok(string,"X");
+        theRooms[roomNum].y = atoi(y);
+        //x dimension
+        x = strtok(NULL," ");
+        theRooms[roomNum].x = atoi(x);
+        
+        str = strtok(NULL,"\n");
+        strcpy(newString,str);
+        for(int i=0;i<=strlen(newString);i++)
+        {
+            //doing the math for the door coordinates
+            if(newString[0] == 'd')
+            {
+                i++;
+                if(newString[1] == 'n')
+                {
+                    if(roomNum <= 2)
+                    {
+                        theRooms[roomNum].doorY[doorNum] = 1;
+                    }
+                    else if (roomNum>=3)
+                    {
+                        theRooms[roomNum].doorY[doorNum] = 19;
+                    }
+                    door = strtok(NULL," ");
+                    i = i + strlen(door);
+                }
+                else if(newString[1] == 's')
+                {
+                    if(roomNum<=2)
+                    {
+                    	theRooms[roomNum].doorY[doorNum] = theRooms[roomNum].y;
+                    }
+                    else if(roomNum>=3)
+                    {
+                        theRooms[roomNum].doorY[doorNum] = theRooms[roomNum].y + 19;
+                    }
+                   	door = strtok(NULL," ");
+                    i = i + strlen(door);
+                }
+                else if(newString[1] == 'e')
+                {
+                    if(roomNum==0||roomNum==3)
+                    {
+                        theRooms[roomNum].doorX[doorNum] = theRooms[roomNum].x;
+                    }
+                    else if(roomNum==1||roomNum==4)
+                    {
+                        theRooms[roomNum].doorX[doorNum] = 26 + theRooms[roomNum].x;
+                    }
+                    else if(roomNum==2||roomNum==5)
+                    {
+                        theRooms[roomNum].doorX[doorNum] = 51 + theRooms[roomNum-1].x;
+                    }
+                    door = strtok(str," ");
+                    i = i + strlen(door);
+                }
+                else if(newString[1] == 'w')
+                {
+                    if(roomNum==0||roomNum==3)
+                    {
+                        theRooms[roomNum].doorX[doorNum] = 1;
+                    }
+                    else if(roomNum==1||roomNum==4)
+                    {
+                        theRooms[roomNum].doorX[doorNum] = 26;
+                    }
+                    else if(roomNum==2||roomNum==5)
+                    {
+                        theRooms[roomNum].doorX[doorNum] = 51;
+                    }
+                    door = strtok(NULL," ");
+                    i = i + strlen(door);
+                }
+                memset(newDoor,0,strlen(door));
+                for(int w = 0; w<strlen(door)-2;w++)
+                {
+        	        newDoor[w] = door[w+2];
+                }
+                //part 2 of door math
+                if((door[1] == 'n')||(door[1] == 's'))
+                {
+                    if(roomNum==0||roomNum==3)
+                    {
+                        theRooms[roomNum].doorX[doorNum] = atoi(newDoor);
+                    }
+                    else if(roomNum==1||roomNum==4)
+                    {
+                        theRooms[roomNum].doorX[doorNum] = atoi(newDoor) + 26;
+                    }
+                    else if(roomNum==2||roomNum==5)
+                    {
+                        theRooms[roomNum].doorX[doorNum] = atoi(newDoor) + 51;
+                    }
+                }
+                else if ((door[1]== 'e')||(door[1]=='w'))
+                {
+                    if(roomNum<=2)
+                    {
+                        theRooms[roomNum].doorY[doorNum] = atoi(newDoor);
+                    }
+                    else if(roomNum>=3)
+                    {
+                        theRooms[roomNum].doorY[doorNum] = atoi(newDoor) + 19;
+                    }
+                }
+                doorNum++;
+                for(int f = 0; f<strlen(newString);f++)
+                {
+                    newString[f] = newString[f + strlen(door)+1];
+                }
+            }
+            //hero parsing
+            else if(newString[0]=='h')
+            {
+                hero = strtok(NULL," ");
+                while(hero[i] != ',')
+                {
+                    heroY[i] = hero[i+1];
+                    i++;
+                }
+                for(int i = 0; i<strlen(hero)-strlen(heroY)-2;i++)
+                {
+                    heroX[i] = hero[strlen(heroY)+2];
+                }
+                theRooms[roomNum].heroX = atoi(heroX);
+                theRooms[roomNum].heroY = atoi(heroY);
+                for(int i = 0; i<strlen(newString);i++)
+                {
+                    newString[i] = newString[i + strlen(hero)+1];
+                }
+            }
+            //stairs parsing
+            else if(newString[0] == 'z')
+            {
+                stairDown = strtok(NULL, " ");
+                while(stairDown[i] != ',')
+                {
+                    stairDY[i] = stairDown[i+1];
+                    i++;
+                }
+                for(int i = 0; i<strlen(stairDown)-strlen(stairDY)-2;i++)
+                {
+                    stairDX[i] = stairDown[strlen(stairDY)+2];
+                }
+                theRooms[roomNum].stairDX[stairdNum] = atoi(stairDX);
+                theRooms[roomNum].stairDY[stairdNum] = atoi(stairDY);
+                stairdNum++;
+                for(int i = 0; i<strlen(newString);i++)
+                {
+                    newString[i] = newString[i + strlen(stairDown)+1];
+                }
+            }
+            //stairs parsing
+            else if (newString[0] == 'a')
+            {
+                stairUp = strtok(NULL, " ");
+                while(stairUp[i] != ',')
+                {
+                    stairUY[i] = stairUp[i+1];
+                    i++;
+                }
+                for(int i = 0; i<strlen(stairUp)-strlen(stairUY)-2;i++)
+                {
+                    stairUX[i] = stairUp[strlen(stairUY)+2];
+                }
+                theRooms[roomNum].stairUX[stairuNum] = atoi(stairUX);
+                theRooms[roomNum].stairUY[stairuNum] = atoi(stairUY);
+                stairuNum++;
+                for(int i = 0; i<strlen(newString);i++)
+                {
+                    newString[i] = newString[i + strlen(stairUp)+1];
+                }
+            }
+            //small gold parsing
+            else if(newString[0] == 'g')
+            {
+                sGold = strtok(NULL, " ");
+                while(sGold[i] != ',')
+                {
+                    sGoldy[i] = sGold[i+1];
+                    i++;
+                }
+                for(int i = 0; i<strlen(sGold)-strlen(sGoldy)-2;i++)
+                {
+                    sGoldx[i] = sGold[strlen(sGoldy)+2];
+                }
+                theRooms[roomNum].sGoldx[sGoldnum] = atoi(sGoldx);
+                theRooms[roomNum].sGoldy[sGoldnum] = atoi(sGoldy);
+                sGoldnum++;
+                for(int i = 0; i<strlen(newString);i++)
+                {
+                    newString[i] = newString[i + strlen(sGold)+1];
+                }
+            }
+            //big gold parsing
+            else if(newString[0] == 'G')
+            {
+                bGold = strtok(NULL, " ");
+                while(bGold[i] != ',')
+                {
+                    bGoldy[i] = bGold[i+1];
+                    i++;
+                }
+                for(int i = 0; i<strlen(bGold)-strlen(bGoldy)-2;i++)
+                {
+                    bGoldx[i] = bGold[strlen(bGoldy)+2];
+                }
+                theRooms[roomNum].bGoldx = atoi(bGoldx);
+                theRooms[roomNum].bGoldy = atoi(bGoldy);
+                for(int i = 0; i<strlen(newString);i++)
+                {
+                    newString[i] = newString[i + strlen(bGold)+1];
+                }
+            }
+            //small weapon parsing
+            else if(newString[0] == 'w')
+            {
+                cWep = strtok(NULL, " ");
+                while(cWep[i] != ',')
+                {
+                    cWepy[i] = cWep[i+1];
+                    i++;
+                }
+                for(int i = 0; i<strlen(cWep)-strlen(cWepy)-2;i++)
+                {
+                    cWepx[i] = cWep[strlen(cWepy)+2];
+                }
+                theRooms[roomNum].cWepx[cWepn] = atoi(cWepx);
+                theRooms[roomNum].cWepy[cWepn] = atoi(cWepy);
+                cWepn++;
+                for(int i = 0; i<strlen(newString);i++)
+                {
+                    newString[i] = newString[i + strlen(cWep)+1];
+                }
+            }
+            //rare weapon parse
+            else if(newString[0] == 'W')
+            {
+                rWep = strtok(NULL, " ");
+                while(rWep[i] != ',')
+                {
+                    rWepy[i] = rWep[i+1];
+                    i++;
+                }
+                for(int i = 0; i<strlen(rWep)-strlen(rWepy)-2;i++)
+                {
+                    rWepx[i] = rWep[strlen(rWepy)+2];
+                }
+                theRooms[roomNum].rWepx = atoi(rWepx);
+                theRooms[roomNum].rWepy = atoi(rWepy);
+                for(int i = 0; i<strlen(newString);i++)
+                {
+                    newString[i] = newString[i + strlen(rWep)+1];
+                }
+            }
+            //weak monster parse
+            else if(newString[0] == 'm')
+            {
+                wMon = strtok(NULL, " ");
+                while(wMon[i] != ',')
+                {
+                    wMony[i] = wMon[i+1];
+                    i++;
+                }
+                for(int i = 0; i<strlen(wMon)-strlen(wMony)-2;i++)
+                {
+                    wMonx[i] = wMon[strlen(wMony)+2];
+                }
+                theRooms[roomNum].wMonx[wMonn] = atoi(wMonx);
+                theRooms[roomNum].wMony[wMonn] = atoi(wMony);
+                wMonn++;
+                for(int i = 0; i<strlen(newString);i++)
+                {
+                    newString[i] = newString[i + strlen(wMon)+1];
+                }
+            }
+            //equipment parsing
+            else if(newString[0] == 'e')
+            {
+                equip = strtok(NULL, " ");
+                while(equip[i] != ',')
+                {
+                    equipY[i] = equip[i+1];
+                    i++;
+                }
+                for(int i = 0; i<strlen(equip)-strlen(equipY)-2;i++)
+                {
+                    equipX[i] = equip[strlen(equipX)+2];
+                }
+                theRooms[roomNum].equipX[wMonn] = atoi(equipX);
+                theRooms[roomNum].equipY[wMonn] = atoi(equipY);
+                eqN++;
+                for(int i = 0; i<strlen(newString);i++)
+                {
+                    newString[i] = newString[i + strlen(equip)+1];
+                }
+            }
+            //strong monster parse
+            else if(newString[0] == 'M')
+            {
+                sMon = strtok(NULL, " ");
+                while(sMon[i] != ',')
+                {
+                    sMony[i] = sMon[i+1];
+                    i++;
+                }
+                for(int i = 0; i<strlen(sMon)-strlen(sMony)-2;i++)
+                {
+                    sMonx[i] = sMon[strlen(sMony)+2];
+                }
+                theRooms[roomNum].sMonx[sMonn] = atoi(sMonx);
+                theRooms[roomNum].sMony[sMonn] = atoi(sMony);
+                sMonn++;
+                for(int i = 0; i<strlen(newString);i++)
+                {
+                    newString[i] = newString[i + strlen(sMon)+1];
+                }
+            }
+            //potion parse
+            else if(newString[0] =='p')
+            {
+                pot = strtok(NULL, " ");
+                while(pot[i] != ',')
+                {
+                    poty[i] = pot[i+1];
+                    i++;
+                }
+                for(int i = 0; i<strlen(pot)-strlen(pot)-2;i++)
+                {
+                    potx[i] = pot[strlen(poty)+2];
+                }
+                theRooms[roomNum].potx[potN] = atoi(potx);
+                theRooms[roomNum].poty[potN] = atoi(poty);
+                potN++;
+                for(int i = 0; i<strlen(newString);i++)
+                {
+                    newString[i] = newString[i + strlen(pot)+1];
+                }
+            }
+        }
+        yVal[roomNum] = theRooms[roomNum].y;
+        xVal[roomNum] = theRooms[roomNum].x;
+        roomNum++;
+    }
+    free(theRooms);
+    fclose(specFile);
+    startGame(yVal, xVal);
+}
+
+void startGame(int yVal[], int xVal[])
+{
+    int maX;
+    int maY;
+    
+    initscr();
+    noecho();
+    cbreak();
+    getmaxyx(stdscr,maX,maY);
+    //getch();
+    mvprintw(3,3,"Max screen is %d : %d.\n Press any button to continue.",maX,maY);
+    getch();
+    erase();
+    for (int i = 0; i<= 2; i++)
+    {
+      //  mvprintw(20,20,"y:%d x:%d",yVal[i],xVal[i]);
+        drawMap(i,yVal[i],xVal[i]);//////////
+        //getch();
+    }
+    for (int i = 3; i<=5; i++)
+    {
+        //mvprintw(20,20,"y: %d x:%d",yVal[i],xVal[i]);///////////////
+        drawMap(i,yVal[i],xVal[i]);
+        //getch();
+    }
+    mvprintw(5,5,player);
+    move(5,5);
+    inGame();
+    endwin();
+}
+
+void inGame()
+{
+    int curX;
+    int curY;
+    char userPress;
+    
+    curY = getcury(stdscr);
+    curX = getcurx(stdscr);
+    userPress = getch();
+    while(userPress != 'q')
+    {
+        moveDude(curY,curX,userPress);
+        curX = getcurx(stdscr);
+        curY = getcury(stdscr);
+        userPress = getch();
+    }
+    //put the enof game function here
+}
+
+void moveDude(int curY, int curX, char userPress)
+{
+    //go left
+    if(userPress == 'a')
+    {
+        if(checkMove(curY, curX-1)==0)
+        {
+            moveGuy(curY, curX-1);
+        }
+        else
+        {
+            moveGuy(curY,curX);
+        }
+    }
+    //go right
+    else if(userPress == 'd')
+    {
+        if(checkMove(curY, curX + 1) == 0)
+        {
+            moveGuy(curY, curX+1);
+        }
+        else
+        {
+            moveGuy(curY,curX);
+        }
+    }
+    //go down
+    else if(userPress == 's')
+    {
+        if(checkMove(curY+1,curX) == 0)
+        {
+            moveGuy(curY+1,curX);
+        }
+        else
+        {
+            moveGuy(curY,curX);
+        }
+    }
+    //go up
+    else if(userPress == 'w')
+    {
+        if(checkMove(curY-1,curX)==0)
+        {
+            moveGuy(curY-1,curX);
+        }
+        else
+        {
+            moveGuy(curY,curX);
+        }
+    }
+}
+
+void moveGuy(int newY, int newX)
+{
+    printw(".");
+    mvprintw(newY,newX,player);
+    move(newY,newX);
+}
+
+int checkMove(int nextY, int nextX)
+{
+    int x;
+    int y;
+    char obstacle;
+    int gold = 0;
+    x = getcurx(stdscr);
+    y = getcury(stdscr);
+    obstacle = (char)mvinch(nextY,nextX);
+    move(y,x);
+    
+    if(obstacle=='|'||obstacle=='-'||obstacle=='A'||obstacle=='S'||obstacle=='Z'||obstacle=='T')
+    {
+        return (1);
+    }
+    else if(obstacle == '*')
+    {
+        gold = gold + rand()%50 + 1;
+        return 0;
+    }
+    else if(obstacle == '8')
+    {
+        gold = gold + rand()%200 + 50;
+        return 0;
+    }
+    return 0;
+}
+
+void drawMap(int roomnum, int height, int width)
+{
+    int xX;
+    int yY;
+    if(roomnum==0)
+    {
+        yY = 1;
+        xX = 1;
+    }
+    else if(roomnum == 1)
+    {
+        yY = 1;
+        xX = 26;
+    }
+    else if (roomnum == 2)
+    {
+        yY = 1;
+        xX = 51;
+    }
+    else if(roomnum == 3)
+    {
+        yY = 19;
+        xX = 1;
+    }
+    else if(roomnum ==4)
+    {
+        yY = 19;
+        xX = 26;
+    }
+    else if(roomnum == 5)
+    {
+        yY = 19;
+        xX = 51;
+    }
+    for(int i = xX; i<(width + xX);i++)
+    {
+        for(int j = yY; j<(height + yY);j++)
+        {
+            mvaddch(j,i,'.');
+        }
+    }
+    for(int v = xX; v<(width + xX);v++)
+    {
+        mvaddch(yY,v,'-');
+    }
+    for(int w = yY; w<(height + yY);w++)
+    {
+        mvaddch(w,xX,'|');
+        mvaddch(w,(width+xX),'|');
+    }
+    for(int z = xX; z<(width + xX); z++)
+    {
+        mvaddch((height + yY), z, '-');
+    }
+    
+}
+

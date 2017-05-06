@@ -1,0 +1,15 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <ncurses.h>
+#include "functions.h"
+
+int main(int argc, char* argv[])
+{
+    char* file;
+    file = argv[1];
+	getSpec(file);
+//	startGame();
+//	inGame();
+    return 0;
+}
